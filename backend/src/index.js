@@ -61,12 +61,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
   ╔═══════════════════════════════════════════╗
-  ║     🔧 FerreSync API Server               ║
-  ║     Servidor corriendo en puerto ${PORT}     ║
-  ║     http://localhost:${PORT}                 ║
+  ║      🔧 FerreSync API Server              ║
+  ║      Servidor corriendo en puerto ${PORT}     ║
+  ║      Escuchando en 0.0.0.0                ║
   ╚═══════════════════════════════════════════╝
   `);
 });
