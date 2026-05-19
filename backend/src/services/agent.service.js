@@ -15,7 +15,7 @@ const toolKeywordMap = {
   list_inventory: /(inventario\s+actual|inventario\s+total|existencias|catalogo\s+de\s+productos|lista\s+de\s+productos|productos\s+en\s+inventario|que\s+hay\s+en\s+inventario)/,
   list_customers: /(clientes|buscar\s+cliente|listar\s+clientes|cliente\s+con\s+nombre)/,
   get_inventory_value: /(valor\s+del\s+inventario|inventario\s+total|valor\s+inventario|costo\s+inventario)/,
-  build_cart_estimate: /(carrito|cotizacion|presupuesto|lista\s+de\s+materiales|cobertizo|proyecto)/,
+  build_cart_estimate: /(carrito|cotizacion|presupuesto|lista\s+de\s+materiales|cotizar|necesito|necesitar|necesitas|necesitamos|necesito\s+poner|necesito\s+instalar|poner\s+un|instalar\s+un|colocar\s+un|colocar\s+una|instalar\s+una|poner\s+un|proyecto|cobertizo|estante|repisa|repisas|estantes|estanteria|estantería|montar|colgar|mueble|muebles|puerta|ventana|reparar|reparación|reparaciones|reparar\s+una|reparar\s+puerta|electricidad|eléctrico|electrico|cable|enchufe|interruptor|tubería|tuberias|fontanería|plomería|plomeria|azulejo|cerámica|ceramica|yeso|cemento|pegamento|silicón|silicon)/i,
   create_customer: /(crear|agregar|registrar|alta|dar\s+de\s+alta).*(cliente)|cliente\s+nuevo/,
   create_inventory_movement: /(movimiento\s+de\s+inventario|entrada|salida|ajuste|registrar\s+inventario)/
 };
@@ -60,6 +60,26 @@ const CART_RECOMMENDATION_RULES = [
   {
     pattern: /(pintar|pintura|pared|brocha|rodillo)/i,
     items: ['pintura', 'lija', 'cinta adhesiva', 'guantes', 'gafas de seguridad']
+  },
+  {
+    pattern: /(estante|repisa|repisas|estantes|estanteria|estantería|montar|colgar|colocar|poner|instalar)/i,
+    items: ['tabla de madera', 'tornillos', 'taquetes', 'escuadras de soporte', 'lija', 'barniz o sellador', 'taladro', 'brocha o pincel']
+  },
+  {
+    pattern: /(mueble|muebles|puerta|ventana|reparar|reparación|reparaciones)/i,
+    items: ['madera o paneles', 'tornillos', 'bisagras', 'manijas', 'clavos', 'martillo', 'lijas', 'barniz o pintura']
+  },
+  {
+    pattern: /(electrico|eléctrico|cable|enchufe|interruptor|instalación eléctrica|luces)/i,
+    items: ['cable eléctrico', 'interruptores', 'tomas/enchufes', 'conectores', 'fusibles', 'destornillador aislado', 'cinta aislante']
+  },
+  {
+    pattern: /(fontanería|plomería|tubería|tuberias|grifos|llave|fuga)/i,
+    items: ['tubería (PVC o cobre)', 'codos y uniones', 'sellador/teflón', 'grifos o llaves', 'abrazaderas', 'pegamento para tubería']
+  },
+  {
+    pattern: /(azulejo|cerámica|ceramica|colocar azulejos|baldosa)/i,
+    items: ['azulejos', 'adherente/pegamento para azulejo', 'crita o lechada', 'espaciadores', 'cortador de azulejos']
   }
 ];
 
@@ -295,6 +315,8 @@ Reglas:
 - Si necesitas ejecutar una herramienta, usa action = "tool".
 - Si la herramienta es de escritura y allowWrite es false, usa action = "confirm" y pide confirmacion.
 - No inventes datos ni herramientas.
+- IMPORTANTE: Si el usuario pide una lista de materiales, cotizacion, presupuesto, o pregunta "que necesito para ..." / "necesito ..." para realizar un proyecto (ejemplos: pintar una pared, poner un estante, instalar una repisa, montar un mueble), debes preferir action = "tool" con tool = "build_cart_estimate" y, si es posible, devolver en input.items un arreglo con objetos { query, quantity } que el sistema pueda usar para buscar en inventario.
+- Si la pregunta solicita el estado o listado de inventario, usar tool = "list_inventory".
 `,
     user: `
 allowWrite: ${allowWrite ? 'true' : 'false'}
