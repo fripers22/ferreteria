@@ -75,6 +75,10 @@ const buildDefaultCartItems = (message) => {
   return [];
 };
 
+const isMaterialRecommendationRequest = (message) => {
+  return buildDefaultCartItems(message).length > 0;
+};
+
 const normalizeCartItems = (message, input) => {
   const items = Array.isArray(input?.items) ? input.items : [];
   const normalized = items
@@ -375,6 +379,29 @@ const getAgentReply = async ({ message, history, allowWrite, userId, memorySumma
       usedContext: false,
       sources: []
     };
+  }
+
+  if (isMaterialRecommendationRequest(message)) {
+    try {
+      const cartItems = buildDefaultCartItems(message);
+      const toolResult = await executeTool('build_cart_estimate', {
+        items: cartItems,
+        limit: 5
+      });
+
+      return {
+        reply: formatCartEstimateReply(toolResult),
+        usedContext: true,
+        tool: 'build_cart_estimate',
+        sources: []
+      };
+    } catch (error) {
+      return {
+        reply: `No pude generar la recomendacion de materiales. ${error.message}`,
+        usedContext: false,
+        sources: []
+      };
+    }
   }
 
   if (isInventorySnapshotRequest(message)) {
