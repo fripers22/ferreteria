@@ -9,6 +9,28 @@ const {
 } = require('../services/chat-memory.service');
 const { executeTool } = require('../services/agent-tools.service');
 
+const getChatbotErrorMessage = (error) => {
+  const message = String(error?.message || '');
+
+  if (message.includes('GEMINI_API_KEY')) {
+    return 'Falta configurar GEMINI_API_KEY en el backend desplegado.';
+  }
+
+  if (message.includes('Gemini error (401)') || message.includes('Gemini error (403)')) {
+    return 'Gemini rechazo la solicitud. Revisa la API key y que la API este habilitada.';
+  }
+
+  if (message.includes('Gemini error (404)')) {
+    return 'El modelo de Gemini configurado no existe o no esta disponible.';
+  }
+
+  if (message.includes('Gemini error (429)')) {
+    return 'Se excedio la cuota de Gemini o hay demasiadas solicitudes. Intenta mas tarde.';
+  }
+
+  return 'No fue posible procesar la respuesta del asistente. Verifica la conexion con Gemini y la base de datos.';
+};
+
 const sendMessage = async (req, res) => {
   const { message, history = [], allowWrite = false, sessionId } = req.body;
 
@@ -64,7 +86,7 @@ const sendMessage = async (req, res) => {
     console.error('Chatbot error:', error);
     return res.status(502).json({
       success: false,
-      message: 'No fue posible procesar la respuesta del asistente. Verifica la conexion con Gemini y la base de datos.'
+      message: getChatbotErrorMessage(error)
     });
   }
 };
