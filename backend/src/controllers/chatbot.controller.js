@@ -64,7 +64,7 @@ const sendMessage = async (req, res) => {
     console.error('Chatbot error:', error);
     return res.status(502).json({
       success: false,
-      message: 'No fue posible procesar la respuesta del asistente. Verifica que Ollama y la base de datos esten disponibles.'
+      message: 'No fue posible procesar la respuesta del asistente. Verifica la conexion con Gemini y la base de datos.'
     });
   }
 };

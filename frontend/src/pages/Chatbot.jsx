@@ -116,7 +116,7 @@ const Chatbot = () => {
         ...prev,
         {
           role: 'assistant',
-          content: 'No pude conectarme al motor de IA local. Verifica que Ollama este iniciado y vuelve a intentar.'
+          content: 'No pude conectarme al motor de IA online. Verifica la configuracion de Gemini y vuelve a intentar.'
         }
       ]);
     } finally {

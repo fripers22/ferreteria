@@ -9,11 +9,15 @@ import Accounts from './pages/Accounts';
 import Reports from './pages/Reports';
 import Chatbot from './pages/Chatbot';
 import Settings from './pages/Settings';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/pos" element={<POS />} />

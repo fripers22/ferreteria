@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { HiUser, HiLockClosed, HiEye, HiEyeOff } from 'react-icons/hi';
 
@@ -113,6 +113,15 @@ const Login = () => {
                 <span>Iniciar Sesión</span>
               )}
             </button>
+
+            <div className="text-center">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary-600 hover:text-primary-700"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200">

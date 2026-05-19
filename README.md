@@ -8,7 +8,7 @@ Sistema completo de gestión para ferreterías con POS, inventario, cuentas por 
 - Node.js + Express.js
 - PostgreSQL + Prisma ORM + pgvector (RAG)
 - JWT para autenticación
-- Ollama local (chatbot sin costo por API)
+- Gemini API para el chatbot y embeddings
 
 ### Frontend
 - React 18 + Vite
@@ -46,13 +46,17 @@ npm run rag:ingest
 ```
 Si actualizas los documentos, vuelve a ejecutar `npm run rag:ingest -- --reset`.
 
-### 3.1 Configurar IA local (Ollama)
-Instala Ollama y descarga un modelo local:
+### 3.1 Configurar IA online (Gemini)
+1. Crea tu API key en Google AI Studio: https://aistudio.google.com/
+2. Abre `backend/.env` y pega la clave en `GEMINI_API_KEY`.
+3. Si despliegas en Vercel, agrega la misma variable en el panel de Environment Variables del proyecto.
+4. Reinicia el backend.
+
+Variables usadas por defecto:
 ```bash
-ollama pull llama3.2:3b
-ollama pull nomic-embed-text
+GEMINI_MODEL="gemini-1.5-flash"
+GEMINI_EMBEDDING_MODEL="text-embedding-004"
 ```
-Luego deja Ollama ejecutandose en segundo plano (por defecto usa `http://localhost:11434`).
 
 ### 4. Configurar Frontend
 ```bash
@@ -114,7 +118,7 @@ ferreteria/
 - ✅ Control de clientes
 - ✅ Cuentas por cobrar (crédito/fiado)
 - ✅ Reportes de ventas
-- ✅ Chatbot asistente (con Ollama local)
+- ✅ Chatbot asistente (con Gemini online)
 - ✅ Dashboard con estadísticas
 
 ## Agente IA con RAG
