@@ -55,7 +55,7 @@ Si actualizas los documentos, vuelve a ejecutar `npm run rag:ingest -- --reset`.
 Variables usadas por defecto:
 ```bash
 GEMINI_MODEL="gemini-1.5-flash"
-GEMINI_EMBEDDING_MODEL="text-embedding-004"
+GEMINI_EMBEDDING_MODEL="gemini-embedding-2"
 ```
 
 ### 4. Configurar Frontend

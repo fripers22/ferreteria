@@ -1,6 +1,6 @@
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
-const GEMINI_EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'text-embedding-004';
+const GEMINI_EMBEDDING_MODEL = process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-2';
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta';
 
 const requestGemini = async (path, payload) => {
@@ -77,7 +77,8 @@ const createEmbedding = async (input) => {
   const data = await requestGemini(`/models/${GEMINI_EMBEDDING_MODEL}:embedContent`, {
     content: {
       parts: [{ text: String(input) }]
-    }
+    },
+    outputDimensionality: 768
   });
 
   const embedding = data?.embedding?.values;
