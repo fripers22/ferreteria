@@ -86,7 +86,8 @@ const sendMessage = async (req, res) => {
     console.error('Chatbot error:', error);
     return res.status(502).json({
       success: false,
-      message: getChatbotErrorMessage(error)
+      message: getChatbotErrorMessage(error),
+      details: String(error?.message || 'Error desconocido')
     });
   }
 };

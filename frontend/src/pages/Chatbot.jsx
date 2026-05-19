@@ -111,12 +111,15 @@ const Chatbot = () => {
       }
     } catch (error) {
       const message = error.response?.data?.message || 'No se pudo obtener respuesta del asistente';
+      const details = error.response?.data?.details;
       toast.error(message);
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: 'No pude conectarme al motor de IA online. Verifica la configuracion de Gemini y vuelve a intentar.'
+          content: details
+            ? `${message}\n\nDetalle: ${details}`
+            : 'No pude conectarme al motor de IA online. Verifica la configuracion de Gemini y vuelve a intentar.'
         }
       ]);
     } finally {
