@@ -30,6 +30,15 @@ const TOOL_DEFS = [
     }
   },
   {
+    name: 'list_inventory',
+    description: 'Lista productos activos del inventario con stock, precios y categoria.',
+    write: false,
+    inputs: {
+      search: 'string opcional para filtrar por nombre, sku o codigo de barras',
+      limit: 'number opcional (max 50)'
+    }
+  },
+  {
     name: 'list_customers',
     description: 'Lista clientes con busqueda opcional por nombre, telefono o email.',
     write: false,
@@ -219,6 +228,44 @@ const findProduct = async (input) => {
   return {
     success: true,
     data: products
+  };
+};
+
+const listInventory = async (input) => {
+  const limit = clamp(input?.limit, 1, 50, 20);
+  const search = input?.search ? String(input.search).trim() : null;
+
+  const where = { active: true };
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { sku: { contains: search, mode: 'insensitive' } },
+      { barcode: { contains: search, mode: 'insensitive' } }
+    ];
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    include: { category: true },
+    orderBy: [{ name: 'asc' }],
+    take: limit
+  });
+
+  return {
+    success: true,
+    data: products.map((product) => ({
+      id: product.id,
+      name: product.name,
+      sku: product.sku,
+      barcode: product.barcode,
+      stock: product.stock,
+      minStock: product.minStock,
+      salePrice: product.salePrice,
+      costPrice: product.costPrice,
+      active: product.active,
+      category: product.category ? { id: product.category.id, name: product.category.name } : null
+    }))
   };
 };
 
@@ -480,6 +527,8 @@ const executeTool = async (toolName, input, context) => {
       return getDailySalesSummary(input);
     case 'find_product':
       return findProduct(input);
+    case 'list_inventory':
+      return listInventory(input);
     case 'list_customers':
       return listCustomers(input);
     case 'get_inventory_value':

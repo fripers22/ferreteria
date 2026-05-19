@@ -12,6 +12,7 @@ const toolKeywordMap = {
   list_low_stock: /(bajo\s+stock|stock\s+bajo|bajo\s+inventario|faltan\s+productos|productos\s+bajo\s+stock)/,
   get_daily_sales_summary: /(ventas\s+del\s+dia|ventas\s+hoy|resumen\s+de\s+ventas|ticket\s+promedio)/,
   find_product: /(producto|productos|sku|codigo\s+de\s+barras|buscar\s+producto|precio|stock\s+de\s+producto)/,
+  list_inventory: /(inventario\s+actual|inventario\s+total|existencias|catalogo\s+de\s+productos|lista\s+de\s+productos|productos\s+en\s+inventario|que\s+hay\s+en\s+inventario)/,
   list_customers: /(clientes|buscar\s+cliente|listar\s+clientes|cliente\s+con\s+nombre)/,
   get_inventory_value: /(valor\s+del\s+inventario|inventario\s+total|valor\s+inventario|costo\s+inventario)/,
   build_cart_estimate: /(carrito|cotizacion|presupuesto|lista\s+de\s+materiales|cobertizo|proyecto)/,
@@ -31,6 +32,13 @@ const isCustomerInfoRequest = (message) => {
   const mentionsCliente = /cliente/.test(text);
   const mentionsInfo = /(informacion|datos|requisitos|necesito|que\s+se\s+requiere)/.test(text);
   return mentionsCliente && mentionsInfo;
+};
+
+const isInventorySnapshotRequest = (message) => {
+  const text = String(message || '').toLowerCase();
+  const mentionsInventory = /(inventario|existencias|stock|catalogo|productos)/.test(text);
+  const mentionsSnapshot = /(actual|actualizado|completo|detalle|lista|ver|mostrar|hay|tiene|dispone)/.test(text);
+  return mentionsInventory && mentionsSnapshot;
 };
 
 const isLikelyCustomerPayload = (parsed) => {
@@ -369,6 +377,24 @@ const getAgentReply = async ({ message, history, allowWrite, userId, memorySumma
     };
   }
 
+  if (isInventorySnapshotRequest(message)) {
+    try {
+      const toolResult = await executeTool('list_inventory', { limit: 20 });
+      return {
+        reply: formatInventorySnapshotReply(toolResult),
+        usedContext: true,
+        tool: 'list_inventory',
+        sources: []
+      };
+    } catch (error) {
+      return {
+        reply: `No pude consultar el inventario actual. ${error.message}`,
+        usedContext: false,
+        sources: []
+      };
+    }
+  }
+
   if (isCreateCustomerIntent(message)) {
     if (!allowWrite) {
       return {
@@ -529,6 +555,31 @@ const getAgentReply = async ({ message, history, allowWrite, userId, memorySumma
       sources: []
     };
   }
+};
+
+const formatInventorySnapshotReply = (toolResult) => {
+  if (!toolResult?.success) {
+    return toolResult?.message || 'No fue posible consultar el inventario actual.';
+  }
+
+  const products = Array.isArray(toolResult.data) ? toolResult.data : [];
+
+  if (products.length === 0) {
+    return 'No encontré productos activos en el inventario.';
+  }
+
+  const lines = [`Inventario actual: ${products.length} productos mostrados.`];
+
+  for (const product of products.slice(0, 10)) {
+    const categoryName = product.category?.name || 'Sin categoria';
+    lines.push(`- ${product.name} | SKU: ${product.sku || 'N/D'} | Stock: ${product.stock} | Min: ${product.minStock} | Categoria: ${categoryName}`);
+  }
+
+  if (products.length > 10) {
+    lines.push(`... y ${products.length - 10} productos mas.`);
+  }
+
+  return lines.join('\n');
 };
 
 module.exports = {
