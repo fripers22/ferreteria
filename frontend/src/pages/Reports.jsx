@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { salesService, inventoryService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { HiChartBar, HiCalendar, HiTrendingUp, HiCube } from 'react-icons/hi';
+import toast from 'react-hot-toast';
 
 const Reports = () => {
   const { isAdmin } = useAuth();
@@ -47,6 +48,18 @@ const Reports = () => {
     acc[sale.paymentMethod] = (acc[sale.paymentMethod] || 0) + parseFloat(sale.total);
     return acc;
   }, {});
+
+  const handleOpenPdf = async (saleId) => {
+    try {
+      const pdfBlob = await salesService.getPdf(saleId);
+      const blobUrl = window.URL.createObjectURL(pdfBlob);
+      window.open(blobUrl, '_blank', 'noopener,noreferrer');
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 10000);
+    } catch (error) {
+      console.error('Error abriendo PDF:', error);
+      toast.error('No se pudo abrir el PDF de la venta');
+    }
+  };
 
   if (loading) {
     return (
@@ -182,6 +195,7 @@ const Reports = () => {
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Vendedor</th>
                 <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">Método</th>
                 <th className="px-4 py-3 text-right text-sm font-medium text-gray-600">Total</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-gray-600">PDF</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -203,6 +217,14 @@ const Reports = () => {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right font-medium">{formatCurrency(sale.total)}</td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => handleOpenPdf(sale.id)}
+                      className="btn-secondary text-sm py-1 px-3"
+                    >
+                      Ver PDF
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

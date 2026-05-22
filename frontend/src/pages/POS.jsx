@@ -126,6 +126,22 @@ const POS = () => {
 
       if (response.success) {
         toast.success(`Venta #${response.data.id} registrada correctamente`);
+
+        try {
+          const pdfBlob = await salesService.getPdf(response.data.id);
+          const blobUrl = window.URL.createObjectURL(pdfBlob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `venta-${response.data.id}.pdf`;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          window.URL.revokeObjectURL(blobUrl);
+        } catch (pdfError) {
+          console.error('Error descargando PDF de venta:', pdfError);
+          toast.error('La venta se registró, pero no se pudo generar el PDF');
+        }
+
         setCart([]);
         setSelectedCustomer(null);
         setDiscount(0);

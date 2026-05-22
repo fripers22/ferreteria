@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const {
   getAllSales,
   getSaleById,
+  getSalePdf,
   createSale,
   cancelSale,
   getDailySales
@@ -16,6 +17,7 @@ router.use(authMiddleware);
 
 router.get('/', getAllSales);
 router.get('/daily', getDailySales);
+router.get('/:id/pdf', getSalePdf);
 router.get('/:id', getSaleById);
 
 router.post(

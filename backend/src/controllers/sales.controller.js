@@ -1,4 +1,117 @@
 const prisma = require('../config/database');
+const PDFDocument = require('pdfkit');
+
+const formatCurrency = (value) => new Intl.NumberFormat('es-MX', {
+  style: 'currency',
+  currency: 'MXN'
+}).format(Number(value || 0));
+
+const streamSalePdf = (res, sale) => {
+  const doc = new PDFDocument({ margin: 40, size: 'A4' });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="venta-${sale.id}.pdf"`);
+  doc.pipe(res);
+
+  const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+  const contentWidth = pageWidth;
+
+  doc
+    .fillColor('#1d4ed8')
+    .fontSize(20)
+    .text('FerreSync', { align: 'center' });
+
+  doc
+    .moveDown(0.3)
+    .fillColor('#111827')
+    .fontSize(14)
+    .text('Comprobante de Venta', { align: 'center' });
+
+  doc
+    .moveDown(0.8)
+    .fontSize(10)
+    .fillColor('#374151')
+    .text(`Venta #${sale.id}   |   Fecha: ${new Date(sale.createdAt).toLocaleString('es-MX')}`, {
+      width: contentWidth,
+      align: 'left'
+    });
+
+  doc
+    .moveDown(0.3)
+    .text(`Proveedor / Tienda: FerreSync`, { width: contentWidth })
+    .text(`Vendedor: ${sale.user?.fullName || 'N/D'}`, { width: contentWidth })
+    .text(`Cliente: ${sale.customer?.name || 'Cliente general'}`, { width: contentWidth })
+    .text(`Método de pago: ${sale.paymentMethod}`, { width: contentWidth })
+    .text(`Estado: ${sale.paid ? 'Pagada' : 'Pendiente / FIADO'}`, { width: contentWidth });
+
+  doc.moveDown(0.8);
+  doc
+    .fillColor('#111827')
+    .fontSize(12)
+    .text('Detalle de productos', { underline: true });
+
+  const tableTop = doc.y + 10;
+  const col = {
+    qty: 50,
+    name: 210,
+    price: 80,
+    subtotal: 90,
+    right: contentWidth - 50
+  };
+
+  doc
+    .fontSize(10)
+    .fillColor('#374151')
+    .text('Cant.', 50, tableTop)
+    .text('Producto', 100, tableTop)
+    .text('P. Unit.', 320, tableTop)
+    .text('Subtotal', 400, tableTop, { width: 120, align: 'right' });
+
+  doc.moveTo(50, tableTop + 15).lineTo(col.right, tableTop + 15).strokeColor('#d1d5db').stroke();
+
+  let y = tableTop + 22;
+  sale.details.forEach((item) => {
+    const name = item.product?.name || 'Producto';
+    doc
+      .fillColor('#111827')
+      .text(String(item.quantity), 50, y)
+      .text(name, 100, y, { width: 210 })
+      .text(formatCurrency(item.unitPrice), 320, y, { width: 80, align: 'right' })
+      .text(formatCurrency(item.subtotal), 400, y, { width: 120, align: 'right' });
+    y += 22;
+
+    if (y > 720) {
+      doc.addPage();
+      y = 60;
+    }
+  });
+
+  y += 10;
+  doc.moveTo(280, y).lineTo(col.right, y).strokeColor('#d1d5db').stroke();
+  y += 15;
+
+  doc
+    .fontSize(11)
+    .fillColor('#111827')
+    .text(`Subtotal: ${formatCurrency(sale.subtotal)}`, 280, y, { width: 180, align: 'right' });
+  y += 18;
+  doc.text(`Descuento: ${formatCurrency(sale.discount)}`, 280, y, { width: 180, align: 'right' });
+  y += 18;
+  doc.text(`IVA (16%): ${formatCurrency(sale.tax)}`, 280, y, { width: 180, align: 'right' });
+  y += 22;
+
+  doc
+    .fontSize(14)
+    .fillColor('#1d4ed8')
+    .text(`TOTAL: ${formatCurrency(sale.total)}`, 280, y, { width: 180, align: 'right' });
+
+  doc
+    .moveDown(2)
+    .fontSize(9)
+    .fillColor('#6b7280')
+    .text('Documento generado automáticamente por FerreSync.', { align: 'center' });
+
+  doc.end();
+};
 
 const getAllSales = async (req, res) => {
   try {
@@ -81,6 +194,36 @@ const getSaleById = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error al obtener venta'
+    });
+  }
+};
+
+const getSalePdf = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const sale = await prisma.sale.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        customer: true,
+        user: { select: { id: true, fullName: true } },
+        details: { include: { product: true } }
+      }
+    });
+
+    if (!sale) {
+      return res.status(404).json({
+        success: false,
+        message: 'Venta no encontrada'
+      });
+    }
+
+    return streamSalePdf(res, sale);
+  } catch (error) {
+    console.error('Error al generar PDF de venta:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error al generar PDF de venta'
     });
   }
 };
@@ -371,6 +514,7 @@ const getDailySales = async (req, res) => {
 module.exports = {
   getAllSales,
   getSaleById,
+  getSalePdf,
   createSale,
   cancelSale,
   getDailySales

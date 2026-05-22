@@ -119,6 +119,13 @@ export const salesService = {
     return response.data;
   },
 
+  getPdf: async (id) => {
+    const response = await api.get(`/sales/${id}/pdf`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
   cancel: async (id) => {
     const response = await api.delete(`/sales/${id}`);
     return response.data;
