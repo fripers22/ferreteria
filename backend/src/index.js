@@ -10,7 +10,8 @@ const {
   inventoryRoutes,
   accountsRoutes,
   chatbotRoutes,
-  passwordResetRoutes
+  passwordResetRoutes,
+  usersRoutes
 } = require('./routes');
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/accounts', accountsRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/password-reset', passwordResetRoutes);
+app.use('/api/users', usersRoutes);
 
 // 404 handler
 app.use((req, res) => {

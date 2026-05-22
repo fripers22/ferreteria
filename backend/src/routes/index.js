@@ -7,6 +7,7 @@ const inventoryRoutes = require('./inventory.routes');
 const accountsRoutes = require('./accounts.routes');
 const chatbotRoutes = require('./chatbot.routes');
 const passwordResetRoutes = require('./password-reset.routes');
+const usersRoutes = require('./users.routes');
 
 module.exports = {
   authRoutes,
@@ -18,4 +19,6 @@ module.exports = {
   accountsRoutes,
   chatbotRoutes,
   passwordResetRoutes
+  ,
+  usersRoutes
 };
