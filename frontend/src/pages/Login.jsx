@@ -122,6 +122,14 @@ const Login = () => {
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
+            <div className="text-center mt-2">
+              <Link
+                to="/register"
+                className="text-sm text-primary-600 hover:text-primary-700"
+              >
+                ¿No tienes cuenta? Crear una
+              </Link>
+            </div>
           </form>
 
           <div className="mt-6 pt-6 border-t border-gray-200">

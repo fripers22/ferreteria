@@ -3,6 +3,10 @@ import { useAuth } from '../context/AuthContext';
 import { authService } from '../services';
 import toast from 'react-hot-toast';
 import { HiCog, HiLockClosed, HiUser, HiDatabase } from 'react-icons/hi';
+import api from '../services/api';
+import { useEffect } from 'react';
+
+const emptyNewUser = { email: '', fullName: '', password: '', role: 'VENDEDOR' };
 
 const Settings = () => {
   const { user, isAdmin } = useAuth();
@@ -123,7 +127,7 @@ const Settings = () => {
 
         {/* Información del sistema */}
         {isAdmin() && (
-          <div className="card lg:col-span-2">
+            <div className="card lg:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <HiDatabase className="w-6 h-6 text-primary-600" />
               <h2 className="text-lg font-semibold text-gray-800">Información del Sistema</h2>
@@ -148,10 +152,123 @@ const Settings = () => {
               </div>
             </div>
           </div>
+          )}
+
+        {isAdmin() && (
+          <div className="card lg:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <HiCog className="w-6 h-6 text-primary-600" />
+              <h2 className="text-lg font-semibold text-gray-800">Gestión de Usuarios</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <h3 className="font-semibold mb-3">Crear nuevo usuario</h3>
+                <CreateUserForm />
+              </div>
+              <div>
+                <h3 className="font-semibold mb-3">Usuarios existentes</h3>
+                <UsersList />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
   );
 };
+
+function CreateUserForm() {
+  const [form, setForm] = useState(emptyNewUser);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.email || !form.fullName || !form.password) {
+      toast.error('Completa todos los campos');
+      return;
+    }
+    setLoading(true);
+    try {
+      await api.post('/users', { email: form.email, fullName: form.fullName, password: form.password, role: form.role });
+      toast.success('Usuario creado');
+      setForm(emptyNewUser);
+      window.dispatchEvent(new Event('users:changed'));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error creando usuario');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <input placeholder="Correo" className="input-field" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+      <input placeholder="Nombre completo" className="input-field" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
+      <input placeholder="Contraseña" type="password" className="input-field" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+      <select className="input-field" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
+        <option value="VENDEDOR">Vendedor</option>
+        <option value="ADMIN">Administrador</option>
+      </select>
+      <button type="submit" className="btn-primary w-full" disabled={loading}>{loading ? 'Creando...' : 'Crear Usuario'}</button>
+    </form>
+  );
+}
+
+function UsersList() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/users');
+      setUsers(res.data.data || res.data);
+    } catch (err) {
+      toast.error('Error cargando usuarios');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    const onChange = () => load();
+    window.addEventListener('users:changed', onChange);
+    return () => window.removeEventListener('users:changed', onChange);
+  }, []);
+
+  const handleRoleChange = async (id, role) => {
+    try {
+      await api.patch(`/users/${id}/role`, { role });
+      toast.success('Rol actualizado');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error actualizando rol');
+    }
+  };
+
+  if (loading) return <p>Cargando...</p>;
+
+  return (
+    <div className="space-y-2">
+      {users.length === 0 && <p>No hay usuarios</p>}
+      {users.map(u => (
+        <div key={u.id} className="flex items-center justify-between p-2 border rounded">
+          <div>
+            <p className="font-medium">{u.fullName} <span className="text-xs text-gray-500">({u.username || u.email})</span></p>
+            <p className="text-xs text-gray-500">Creado: {new Date(u.createdAt).toLocaleString()}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <select value={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)} className="input-field">
+              <option value="VENDEDOR">Vendedor</option>
+              <option value="ADMIN">Administrador</option>
+            </select>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default Settings;
