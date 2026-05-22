@@ -42,7 +42,7 @@ exports.requestPasswordReset = async (req, res) => {
       message: 'Si el email existe en nuestro sistema, recibirás un enlace de recuperación en 5 minutos'
     };
 
-    // Si el usuario existe, enviar email
+    // Si el usuario existe, enviar email en segundo plano
     if (user && user.email) {
       try {
         // Generar token seguro
@@ -63,14 +63,20 @@ exports.requestPasswordReset = async (req, res) => {
         // Construir URL de reseteo
         const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${token}`;
 
-        // Enviar email
-        await emailService.sendPasswordResetEmail(
-          user.email,
-          user.fullName,
-          resetUrl
-        );
+        // Responder al usuario lo antes posible y disparar el email en background
+        setImmediate(async () => {
+          try {
+            await emailService.sendPasswordResetEmail(
+              user.email,
+              user.fullName,
+              resetUrl
+            );
 
-        console.log(`✅ Email de recuperación enviado a ${user.email}`);
+            console.log(`✅ Email de recuperación enviado a ${user.email}`);
+          } catch (emailError) {
+            console.error('❌ Error enviando email en background:', emailError);
+          }
+        });
       } catch (emailError) {
         console.error('❌ Error enviando email:', emailError);
         // No revelar el error al usuario
