@@ -1,9 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg,#0f172a 0%, #0ea5e9 100%);
+  min-height: 100vh;
 }
 
 /* Scrollbar personalizado */
@@ -48,7 +52,7 @@ body {
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+    @apply bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-gray-100 p-6;
   }
 
   .sidebar-link {

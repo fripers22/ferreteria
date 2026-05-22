@@ -41,18 +41,39 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl">🔧</span>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-800">FerreSync</h1>
-            <p className="text-gray-500 mt-2">Sistema de Gestión de Ferretería</p>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        {/* Left panel - illustration */}
+        <div className="hidden lg:flex flex-col items-start justify-center gap-6 pl-12 text-white">
+          <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center">
+            <span className="text-3xl">🔧</span>
           </div>
+          <h2 className="text-4xl font-bold leading-tight">FerreSync</h2>
+          <p className="text-lg text-white/90 max-w-md">Sistema moderno para la gestión de ferreterías — ventas, inventario y más.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <svg className="w-3/4 mt-6" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0" y="0" width="800" height="500" rx="20" fill="url(#g)" />
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="#06b6d4" />
+                <stop offset="1" stopColor="#7c3aed" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Right panel - form */}
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-md card">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🔧</span>
+              </div>
+              <h1 className="text-3xl font-bold text-gray-800">Bienvenido a FerreSync</h1>
+              <p className="text-gray-500 mt-2">Accede con tu usuario para continuar</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Usuario
@@ -143,8 +164,8 @@ const Login = () => {
           </div>
         </div>
 
-        <p className="text-center text-white/60 text-sm mt-6">
-          FerreSync v1.0 - Sistema de Gestión
+        <p className="text-center text-white/80 text-sm mt-6 lg:col-span-2">
+          FerreSync v1.0 — Sistema de Gestión
         </p>
       </div>
     </div>
