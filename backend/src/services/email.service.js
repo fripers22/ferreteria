@@ -25,6 +25,20 @@ class EmailService {
           pass: this.gmailAppPassword
         }
       });
+      console.log(`📬 Email provider set to Gmail. From: ${this.fromEmail}`);
+
+      // Verificar transporter en arranque para detectar fallos de autenticación tempranos
+      if (!this.gmailUser || !this.gmailAppPassword) {
+        console.warn('⚠️ Gmail credentials missing: GMAIL_USER or GMAIL_APP_PASSWORD is not set. Emails will fail until configured.');
+      } else {
+        this.gmailTransporter.verify()
+          .then(() => {
+            console.log('✅ Gmail transporter verificado correctamente.');
+          })
+          .catch((err) => {
+            console.error('❌ Falló la verificación del Gmail transporter:', err && err.message ? err.message : err);
+          });
+      }
     }
   }
 
@@ -136,16 +150,22 @@ class EmailService {
       throw new Error('Faltan variables GMAIL_USER o GMAIL_APP_PASSWORD');
     }
 
-    const info = await this.gmailTransporter.sendMail({
-      from: this.fromEmail,
-      to: email,
-      subject,
-      text: textContent,
-      html: htmlContent
-    });
+    try {
+      const info = await this.gmailTransporter.sendMail({
+        from: this.fromEmail,
+        to: email,
+        subject,
+        text: textContent,
+        html: htmlContent
+      });
 
-    console.log(`✅ Email enviado vía Gmail a ${email}`);
-    return info;
+      console.log(`✅ Email enviado vía Gmail a ${email} (messageId=${info && info.messageId ? info.messageId : 'unknown'})`);
+      return info;
+    } catch (err) {
+      console.error('❌ Error enviando email vía Gmail:', err && err.message ? err.message : err);
+      // Re-throw para que la capa superior (controlador) lo capture si lo necesita
+      throw err;
+    }
   }
 
   /**
