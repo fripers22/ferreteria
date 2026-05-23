@@ -84,12 +84,12 @@ const Customers = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Clientes</h1>
           <p className="text-gray-500">{customers.length} clientes registrados</p>
         </div>
-        <button onClick={openCreateModal} className="btn-primary flex items-center gap-2">
+        <button onClick={openCreateModal} className="btn-primary flex items-center justify-center gap-2 sm:justify-start">
           <HiPlus className="w-5 h-5" />
           Nuevo Cliente
         </button>
@@ -110,7 +110,7 @@ const Customers = () => {
       </div>
 
       {/* Lista de clientes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filteredCustomers.map(customer => (
           <div key={customer.id} className="card">
             <div className="flex items-start justify-between">
@@ -175,7 +175,7 @@ const Customers = () => {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90dvh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold">
@@ -230,7 +230,7 @@ const Customers = () => {
                   />
                 </div>
               </div>
-              <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <div className="p-6 border-t border-gray-200 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
                   Cancelar
                 </button>

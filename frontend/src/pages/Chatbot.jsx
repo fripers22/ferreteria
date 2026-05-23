@@ -137,7 +137,7 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] flex flex-col">
+    <div className="min-h-[calc(100dvh-160px)] flex flex-col">
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           <HiChat className="w-8 h-8 text-primary-600" />
@@ -158,7 +158,7 @@ const Chatbot = () => {
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[80%] px-4 py-3 rounded-2xl ${
+                className={`max-w-[92%] sm:max-w-[80%] px-4 py-3 rounded-2xl ${
                   message.role === 'user'
                     ? 'bg-primary-600 text-white rounded-br-md'
                     : 'bg-gray-100 text-gray-800 rounded-bl-md'
@@ -204,7 +204,7 @@ const Chatbot = () => {
               </button>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               type="text"
               value={input}

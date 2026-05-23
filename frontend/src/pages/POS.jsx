@@ -162,7 +162,7 @@ const POS = () => {
   };
 
   return (
-    <div className="flex gap-6 h-[calc(100vh-140px)]">
+    <div className="flex flex-col gap-4 xl:flex-row xl:gap-6 xl:h-[calc(100dvh-140px)]">
       {/* Panel de productos */}
       <div className="flex-1 flex flex-col">
         <div className="mb-4">
@@ -180,7 +180,7 @@ const POS = () => {
         </div>
 
         <div className="flex-1 overflow-auto bg-white rounded-xl border border-gray-200">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 p-4">
+          <div className="grid grid-cols-1 gap-3 p-3 sm:grid-cols-2 sm:p-4 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProducts.slice(0, 20).map(product => (
               <button
                 key={product.id}
@@ -210,7 +210,7 @@ const POS = () => {
       </div>
 
       {/* Panel de carrito */}
-      <div className="w-96 bg-white rounded-xl border border-gray-200 flex flex-col">
+      <div className="w-full bg-white rounded-xl border border-gray-200 flex flex-col xl:w-96 xl:shrink-0">
         <div className="p-4 border-b border-gray-200">
           <h2 className="font-semibold text-gray-800">Carrito de Venta</h2>
         </div>
@@ -272,7 +272,7 @@ const POS = () => {
         {/* Método de pago */}
         <div className="p-4 border-t border-gray-200">
           <label className="block text-sm text-gray-600 mb-2">Método de pago</label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-2">
             {['EFECTIVO', 'TARJETA', 'TRANSFERENCIA', 'FIADO'].map(method => (
               <button
                 key={method}

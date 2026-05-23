@@ -8,6 +8,7 @@ body {
   font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: linear-gradient(135deg,#0f172a 0%, #0ea5e9 100%);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* Scrollbar personalizado */
@@ -27,6 +28,15 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Clases utilitarias personalizadas */
@@ -61,5 +71,13 @@ body {
 
   .sidebar-link-active {
     @apply flex items-center gap-3 px-4 py-3 bg-primary-50 text-primary-600 font-medium rounded-lg;
+  }
+
+  .responsive-modal {
+    @apply w-full max-h-[90dvh] overflow-y-auto rounded-2xl bg-white shadow-2xl;
+  }
+
+  .responsive-table-shell {
+    @apply overflow-x-auto;
   }
 }

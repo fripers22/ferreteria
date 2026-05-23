@@ -88,7 +88,7 @@ const Accounts = () => {
 
       {/* Resumen */}
       {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
           <div className="card bg-gradient-to-r from-orange-500 to-orange-600 text-white">
             <div className="flex items-center justify-between">
               <div>
@@ -124,7 +124,7 @@ const Accounts = () => {
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Cuentas con Saldo</h2>
         {accounts.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[760px]">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Cliente</th>
@@ -190,7 +190,7 @@ const Accounts = () => {
       {/* Modal de pago */}
       {showPaymentModal && selectedAccount && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md">
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90dvh] overflow-y-auto">
             <form onSubmit={handlePayment}>
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold">Registrar Abono</h2>
@@ -230,7 +230,7 @@ const Accounts = () => {
                   />
                 </div>
               </div>
-              <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <div className="p-6 border-t border-gray-200 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setShowPaymentModal(false)} className="btn-secondary">
                   Cancelar
                 </button>

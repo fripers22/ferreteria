@@ -42,9 +42,9 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        <div className="hidden lg:flex flex-col items-start justify-center gap-6 pl-12 text-white">
+    <div className="relative min-h-[100dvh] overflow-hidden px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-6 xl:grid-cols-2 xl:gap-10">
+        <div className="hidden xl:flex flex-col items-start justify-center gap-6 pl-8 text-white 2xl:pl-12">
           <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center">
             <WrenchMark className="w-9 h-9 text-white" />
           </div>
@@ -64,7 +64,7 @@ export default function Register() {
         </div>
 
         <div className="flex items-center justify-center">
-          <div className="w-full max-w-md card">
+          <div className="w-full max-w-[28rem] card sm:p-8">
             <div className="text-center mb-6">
               <h1 className="text-2xl font-bold">Crear Cuenta</h1>
               <p className="text-gray-500 mt-2">Regístrate con correo y contraseña</p>
@@ -99,7 +99,7 @@ export default function Register() {
           </div>
         </div>
 
-        <p className="text-center text-white/80 text-sm mt-6 lg:col-span-2">
+        <p className="text-center text-white/80 text-sm mt-2 xl:col-span-2">
           FerreSync v1.0 — Sistema de Gestión
         </p>
       </div>

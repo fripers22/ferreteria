@@ -22,11 +22,11 @@ const MainLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex">
+    <div className="min-h-[100dvh] bg-gray-100 flex flex-col lg:flex-row">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex min-w-0 flex-col">
         <Topbar />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 min-w-0 px-4 py-4 pb-28 overflow-x-hidden overflow-y-auto sm:px-6 sm:py-6 lg:pb-6">
           <Outlet />
         </main>
       </div>

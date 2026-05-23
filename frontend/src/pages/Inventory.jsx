@@ -159,13 +159,13 @@ const Inventory = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Inventario</h1>
           <p className="text-gray-500">{products.length} productos registrados</p>
         </div>
         {isAdmin() && (
-          <button onClick={openCreateModal} className="btn-primary flex items-center gap-2">
+          <button onClick={openCreateModal} className="btn-primary flex items-center justify-center gap-2 sm:justify-start">
             <HiPlus className="w-5 h-5" />
             Nuevo Producto
           </button>
@@ -174,8 +174,8 @@ const Inventory = () => {
 
       {/* Filtros */}
       <div className="card">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-64">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <div className="flex-1 min-w-0">
             <div className="relative">
               <HiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -190,7 +190,7 @@ const Inventory = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="input-field w-48"
+            className="input-field w-full lg:w-56"
           >
             <option value="">Todas las categorías</option>
             {categories.map(cat => (
@@ -212,7 +212,7 @@ const Inventory = () => {
       {/* Tabla de productos */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[920px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">SKU</th>
@@ -276,14 +276,14 @@ const Inventory = () => {
       {/* Modal de producto */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-auto">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90dvh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold">
                   {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
                 </h2>
               </div>
-              <div className="p-6 grid grid-cols-2 gap-4">
+              <div className="p-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">SKU *</label>
                   <input
@@ -303,7 +303,7 @@ const Inventory = () => {
                     className="input-field"
                   />
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
                   <input
                     type="text"
@@ -383,7 +383,7 @@ const Inventory = () => {
                   />
                 </div>
               </div>
-              <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <div className="p-6 border-t border-gray-200 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">
                   Cancelar
                 </button>
@@ -399,7 +399,7 @@ const Inventory = () => {
       {/* Modal de movimiento */}
       {showMovementModal && movementProduct && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl w-full max-w-md">
+          <div className="bg-white rounded-2xl w-full max-w-md max-h-[90dvh] overflow-y-auto">
             <form onSubmit={handleMovement}>
               <div className="p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold">Movimiento de Inventario</h2>
@@ -441,7 +441,7 @@ const Inventory = () => {
                   />
                 </div>
               </div>
-              <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <div className="p-6 border-t border-gray-200 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setShowMovementModal(false)} className="btn-secondary">
                   Cancelar
                 </button>

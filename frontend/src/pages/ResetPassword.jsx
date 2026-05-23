@@ -91,7 +91,7 @@ export default function ResetPassword() {
    */
   if (verifying) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 sm:p-6">
         <div className="text-center">
           <div className="inline-block animate-spin">
             <div className="text-4xl">🔄</div>
@@ -107,8 +107,8 @@ export default function ResetPassword() {
    */
   if (error && !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+      <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8">
           <div className="text-center">
             <div className="text-5xl mb-4">⚠️</div>
             <h1 className="text-2xl font-bold text-gray-800 mb-2">Enlace Inválido</h1>
@@ -130,8 +130,8 @@ export default function ResetPassword() {
    * Formulario de Reset
    */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 sm:p-6">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8">
         
         {/* Header */}
         <div className="text-center mb-8">

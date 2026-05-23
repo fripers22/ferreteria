@@ -71,7 +71,7 @@ const Reports = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Reportes</h1>
           <p className="text-gray-500">Análisis de ventas e inventario</p>
@@ -80,7 +80,7 @@ const Reports = () => {
 
       {/* Filtro de fechas */}
       <div className="card">
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end">
           <HiCalendar className="w-5 h-5 text-gray-500" />
           <div>
             <label className="block text-xs text-gray-500 mb-1">Desde</label>
@@ -104,7 +104,7 @@ const Reports = () => {
       </div>
 
       {/* Estadísticas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
         <div className="card bg-gradient-to-r from-green-500 to-green-600 text-white">
           <HiTrendingUp className="w-8 h-8 text-green-200 mb-2" />
           <p className="text-green-100">Total Ventas</p>
@@ -128,7 +128,7 @@ const Reports = () => {
       </div>
 
       {/* Ventas por método de pago */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Ventas por Método de Pago</h2>
           <div className="space-y-4">
@@ -186,7 +186,7 @@ const Reports = () => {
       <div className="card">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Últimas Ventas del Período</h2>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[860px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">#</th>

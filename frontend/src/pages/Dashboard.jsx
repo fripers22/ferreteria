@@ -63,28 +63,28 @@ const Dashboard = () => {
       title: 'Ventas del Día',
       value: formatCurrency(stats.dailySales),
       icon: HiCurrencyDollar,
-      color: 'bg-green-500',
+      color: 'text-green-600',
       bgLight: 'bg-green-50'
     },
     {
       title: 'Transacciones',
       value: stats.transactionCount,
       icon: HiShoppingCart,
-      color: 'bg-blue-500',
+      color: 'text-blue-600',
       bgLight: 'bg-blue-50'
     },
     {
       title: 'Productos Bajo Stock',
       value: stats.lowStockCount,
       icon: HiExclamation,
-      color: stats.lowStockCount > 0 ? 'bg-red-500' : 'bg-gray-500',
+      color: stats.lowStockCount > 0 ? 'text-red-600' : 'text-gray-600',
       bgLight: stats.lowStockCount > 0 ? 'bg-red-50' : 'bg-gray-50'
     },
     {
       title: 'Cuentas Pendientes',
       value: formatCurrency(stats.pendingAccounts),
       icon: HiCreditCard,
-      color: 'bg-orange-500',
+      color: 'text-orange-600',
       bgLight: 'bg-orange-50'
     }
   ];
@@ -106,7 +106,7 @@ const Dashboard = () => {
         <p className="text-gray-500">Resumen de actividad de hoy</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
         {statCards.map((card, index) => (
           <div key={index} className="card">
             <div className="flex items-center justify-between">
@@ -115,14 +115,14 @@ const Dashboard = () => {
                 <p className="text-2xl font-bold text-gray-800 mt-1">{card.value}</p>
               </div>
               <div className={`w-12 h-12 ${card.bgLight} rounded-lg flex items-center justify-center`}>
-                <card.icon className={`w-6 h-6 text-${card.color.replace('bg-', '')}`} />
+                <card.icon className={`w-6 h-6 ${card.color}`} />
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
         <div className="card">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Ventas Recientes</h2>
           {recentSales.length > 0 ? (
@@ -158,7 +158,7 @@ const Dashboard = () => {
 
       <div className="card">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Accesos Rápidos</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
           <a href="/pos" className="p-4 bg-primary-50 rounded-lg text-center hover:bg-primary-100 transition-colors">
             <HiShoppingCart className="w-8 h-8 text-primary-600 mx-auto mb-2" />
             <p className="font-medium text-gray-800">Nueva Venta</p>

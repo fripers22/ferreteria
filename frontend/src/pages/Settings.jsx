@@ -45,7 +45,7 @@ const Settings = () => {
         <p className="text-gray-500">Administra tu cuenta y preferencias</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2 xl:gap-6">
         {/* Información de la cuenta */}
         <div className="card">
           <div className="flex items-center gap-3 mb-6">
@@ -133,7 +133,7 @@ const Settings = () => {
               <h2 className="text-lg font-semibold text-gray-800">Información del Sistema</h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-500">Versión</p>
                 <p className="font-semibold text-gray-800">1.0.0</p>
@@ -161,7 +161,7 @@ const Settings = () => {
               <h2 className="text-lg font-semibold text-gray-800">Gestión de Usuarios</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2 mb-6">
               <div>
                 <h3 className="font-semibold mb-3">Crear nuevo usuario</h3>
                 <CreateUserForm />
@@ -254,12 +254,12 @@ function UsersList() {
     <div className="space-y-2">
       {users.length === 0 && <p>No hay usuarios</p>}
       {users.map(u => (
-        <div key={u.id} className="flex items-center justify-between p-2 border rounded">
-          <div>
+        <div key={u.id} className="flex flex-col gap-3 rounded border p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
             <p className="font-medium">{u.fullName} <span className="text-xs text-gray-500">({u.username || u.email})</span></p>
             <p className="text-xs text-gray-500">Creado: {new Date(u.createdAt).toLocaleString()}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:w-44">
             <select value={u.role} onChange={(e) => handleRoleChange(u.id, e.target.value)} className="input-field">
               <option value="VENDEDOR">Vendedor</option>
               <option value="ADMIN">Administrador</option>
