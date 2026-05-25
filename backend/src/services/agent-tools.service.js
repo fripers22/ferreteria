@@ -80,6 +80,119 @@ const TOOL_DEFS = [
     }
   },
   {
+    name: 'create_sale',
+    description: 'Crea una venta (registra detalles, deduce stock, crea movimientos y genera registro).',
+    write: true,
+    inputs: {
+      customerId: 'number opcional',
+      items: 'array requerido de { productId, quantity, unitPrice }',
+      paymentMethod: 'string requerido (EJ: EFECTIVO, TARJETA, FIADO)',
+      discount: 'number opcional'
+    }
+  },
+  {
+    name: 'create_product',
+    description: 'Crea un producto en el inventario.',
+    write: true,
+    inputs: {
+      name: 'string requerido',
+      sku: 'string opcional',
+      barcode: 'string opcional',
+      costPrice: 'number requerido',
+      salePrice: 'number requerido',
+      stock: 'number opcional',
+      minStock: 'number opcional',
+      categoryId: 'number opcional',
+      active: 'boolean opcional'
+    }
+  },
+  {
+    name: 'update_product',
+    description: 'Actualiza campos de un producto existente.',
+    write: true,
+    inputs: {
+      productId: 'number requerido',
+      name: 'string opcional',
+      sku: 'string opcional',
+      barcode: 'string opcional',
+      costPrice: 'number opcional',
+      salePrice: 'number opcional',
+      stock: 'number opcional',
+      minStock: 'number opcional',
+      categoryId: 'number opcional',
+      active: 'boolean opcional'
+    }
+  },
+  {
+    name: 'delete_product',
+    description: 'Desactiva o elimina un producto del inventario (soft-delete).',
+    write: true,
+    inputs: {
+      productId: 'number requerido',
+      hard: 'boolean opcional (si true elimina físicamente)'
+    }
+  },
+  {
+    name: 'update_customer',
+    description: 'Actualiza datos de un cliente.',
+    write: true,
+    inputs: {
+      customerId: 'number requerido',
+      name: 'string opcional',
+      phone: 'string opcional',
+      email: 'string opcional',
+      address: 'string opcional',
+      rfc: 'string opcional'
+    }
+  },
+  {
+    name: 'delete_customer',
+    description: 'Desactiva o elimina un cliente (soft-delete).',
+    write: true,
+    inputs: {
+      customerId: 'number requerido',
+      hard: 'boolean opcional'
+    }
+  },
+  {
+    name: 'list_accounts',
+    description: 'Lista cuentas (cuentas por cobrar) con filtros opcionales.',
+    write: false,
+    inputs: {
+      customerId: 'number opcional',
+      limit: 'number opcional'
+    }
+  },
+  {
+    name: 'get_account',
+    description: 'Obtiene detalle de una cuenta por id.',
+    write: false,
+    inputs: {
+      accountId: 'number requerido'
+    }
+  },
+  {
+    name: 'update_account',
+    description: 'Actualiza campos de una cuenta (balance, limite).',
+    write: true,
+    inputs: {
+      accountId: 'number requerido',
+      balance: 'number opcional (incrementa si se pasa delta?)',
+      creditLimit: 'number opcional'
+    }
+  },
+  {
+    name: 'create_account_transaction',
+    description: 'Registra una transacción en la cuenta (CARGO/ABONO).',
+    write: true,
+    inputs: {
+      accountId: 'number requerido',
+      type: 'CARGO | ABONO',
+      amount: 'number requerido',
+      description: 'string opcional'
+    }
+  },
+  {
     name: 'build_cart_estimate',
     description: 'Genera un carrito estimado con precios desde el inventario (no guarda venta).',
     write: false,
@@ -415,6 +528,267 @@ const createInventoryMovement = async (input, context) => {
   };
 };
 
+const createSaleTool = async (input, context) => {
+  const items = Array.isArray(input?.items) ? input.items : [];
+  const customerId = input?.customerId ? parseInt(input.customerId, 10) : null;
+  const paymentMethod = input?.paymentMethod ? String(input.paymentMethod) : null;
+  const discount = input?.discount ? parseFloat(input.discount) : 0;
+
+  if (!context?.userId) {
+    throw new Error('Usuario no autenticado en el contexto.');
+  }
+
+  if (!items || items.length === 0) {
+    throw new Error('La venta debe tener al menos un producto.');
+  }
+
+  // Verificar stock y calcular totales
+  let subtotal = 0;
+  const saleDetails = [];
+
+  for (const item of items) {
+    const productId = parseInt(item.productId, 10);
+    const quantity = Number.parseFloat(item.quantity);
+
+    if (!Number.isFinite(productId) || !Number.isFinite(quantity) || quantity <= 0) {
+      throw new Error('Cada item debe incluir productId y quantity válidos.');
+    }
+
+    const product = await prisma.product.findUnique({ where: { id: productId } });
+    if (!product) {
+      throw new Error(`Producto con ID ${productId} no encontrado.`);
+    }
+
+    if (!product.active) {
+      throw new Error(`El producto "${product.name}" está desactivado.`);
+    }
+
+    if (product.stock < quantity) {
+      throw new Error(`Stock insuficiente para "${product.name}". Disponible: ${product.stock}`);
+    }
+
+    const unitPrice = item.unitPrice ? parseFloat(item.unitPrice) : parseFloat(product.salePrice);
+    const itemSubtotal = unitPrice * quantity;
+    subtotal += itemSubtotal;
+
+    saleDetails.push({
+      productId: product.id,
+      quantity,
+      unitPrice,
+      subtotal: itemSubtotal
+    });
+  }
+
+  const tax = subtotal * 0.16;
+  const total = subtotal - parseFloat(discount || 0) + tax;
+
+  const sale = await prisma.$transaction(async (tx) => {
+    const newSale = await tx.sale.create({
+      data: {
+        customerId: customerId || null,
+        userId: context.userId,
+        subtotal,
+        discount: parseFloat(discount || 0),
+        tax,
+        total,
+        paymentMethod,
+        paid: paymentMethod !== 'FIADO',
+        details: { create: saleDetails }
+      },
+      include: {
+        customer: true,
+        user: { select: { id: true, fullName: true } },
+        details: { include: { product: true } }
+      }
+    });
+
+    // Actualizar stock y movimientos
+    for (const item of items) {
+      await tx.product.update({
+        where: { id: parseInt(item.productId, 10) },
+        data: { stock: { decrement: item.quantity } }
+      });
+
+      await tx.inventoryMovement.create({
+        data: {
+          productId: parseInt(item.productId, 10),
+          userId: context.userId,
+          type: 'SALIDA',
+          quantity: item.quantity,
+          reason: `Venta #${newSale.id}`
+        }
+      });
+    }
+
+    // Manejo de fiado
+    if (paymentMethod === 'FIADO' && customerId) {
+      let account = await tx.account.findFirst({ where: { customerId: parseInt(customerId) } });
+
+      if (!account) {
+        account = await tx.account.create({ data: { customerId: parseInt(customerId), balance: 0, creditLimit: 5000 } });
+      }
+
+      if (parseFloat(account.balance) + total > parseFloat(account.creditLimit)) {
+        throw new Error(`El cliente excede su límite de crédito. Límite: $${account.creditLimit}, Saldo actual: $${account.balance}`);
+      }
+
+      await tx.account.update({ where: { id: account.id }, data: { balance: { increment: total }, lastActivity: new Date() } });
+
+      await tx.accountTransaction.create({ data: { accountId: account.id, userId: context.userId, type: 'CARGO', amount: total, description: `Venta #${newSale.id} a crédito` } });
+    }
+
+    return newSale;
+  });
+
+  return {
+    success: true,
+    message: 'Venta creada correctamente.',
+    data: sale
+  };
+};
+
+// Product CRUD
+const createProduct = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const name = input?.name ? String(input.name).trim() : null;
+  if (!name) throw new Error('El nombre del producto es requerido.');
+
+  const product = await prisma.product.create({
+    data: {
+      name,
+      sku: input?.sku ? String(input.sku) : null,
+      barcode: input?.barcode ? String(input.barcode) : null,
+      costPrice: input?.costPrice ? parseFloat(input.costPrice) : 0,
+      salePrice: input?.salePrice ? parseFloat(input.salePrice) : 0,
+      stock: input?.stock ? parseInt(input.stock, 10) : 0,
+      minStock: input?.minStock ? parseInt(input.minStock, 10) : 0,
+      categoryId: input?.categoryId ? parseInt(input.categoryId, 10) : null,
+      active: typeof input?.active === 'boolean' ? input.active : true
+    }
+  });
+
+  return { success: true, message: 'Producto creado.', data: product };
+};
+
+const updateProduct = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const productId = parseInt(input?.productId, 10);
+  if (!Number.isFinite(productId)) throw new Error('productId invalido.');
+
+  const updateData = {};
+  if (input?.name) updateData.name = String(input.name);
+  if (input?.sku) updateData.sku = String(input.sku);
+  if (input?.barcode) updateData.barcode = String(input.barcode);
+  if (input?.costPrice !== undefined) updateData.costPrice = parseFloat(input.costPrice);
+  if (input?.salePrice !== undefined) updateData.salePrice = parseFloat(input.salePrice);
+  if (input?.stock !== undefined) updateData.stock = parseInt(input.stock, 10);
+  if (input?.minStock !== undefined) updateData.minStock = parseInt(input.minStock, 10);
+  if (input?.categoryId !== undefined) updateData.categoryId = input.categoryId ? parseInt(input.categoryId, 10) : null;
+  if (input?.active !== undefined) updateData.active = Boolean(input.active);
+
+  const product = await prisma.product.update({ where: { id: productId }, data: updateData });
+  return { success: true, message: 'Producto actualizado.', data: product };
+};
+
+const deleteProduct = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const productId = parseInt(input?.productId, 10);
+  if (!Number.isFinite(productId)) throw new Error('productId invalido.');
+
+  if (input?.hard) {
+    await prisma.product.delete({ where: { id: productId } });
+    return { success: true, message: 'Producto eliminado permanentemente.' };
+  }
+
+  const product = await prisma.product.update({ where: { id: productId }, data: { active: false } });
+  return { success: true, message: 'Producto desactivado (soft-delete).', data: product };
+};
+
+// Customer CRUD
+const updateCustomer = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const customerId = parseInt(input?.customerId, 10);
+  if (!Number.isFinite(customerId)) throw new Error('customerId invalido.');
+
+  const data = {};
+  if (input?.name) data.name = String(input.name);
+  if (input?.phone) data.phone = String(input.phone);
+  if (input?.email) data.email = String(input.email);
+  if (input?.address) data.address = String(input.address);
+  if (input?.rfc) data.rfc = String(input.rfc);
+
+  const customer = await prisma.customer.update({ where: { id: customerId }, data });
+  return { success: true, message: 'Cliente actualizado.', data: customer };
+};
+
+const deleteCustomer = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const customerId = parseInt(input?.customerId, 10);
+  if (!Number.isFinite(customerId)) throw new Error('customerId invalido.');
+
+  if (input?.hard) {
+    await prisma.customer.delete({ where: { id: customerId } });
+    return { success: true, message: 'Cliente eliminado permanentemente.' };
+  }
+
+  const customer = await prisma.customer.update({ where: { id: customerId }, data: { active: false } });
+  return { success: true, message: 'Cliente desactivado (soft-delete).', data: customer };
+};
+
+// Accounts and transactions
+const listAccounts = async (input) => {
+  const limit = clamp(input?.limit, 1, 100, 20);
+  const where = {};
+  if (input?.customerId) where.customerId = parseInt(input.customerId, 10);
+
+  const accounts = await prisma.account.findMany({ where, take: limit, include: { customer: true } });
+  return { success: true, data: accounts };
+};
+
+const getAccount = async (input) => {
+  const accountId = parseInt(input?.accountId, 10);
+  if (!Number.isFinite(accountId)) throw new Error('accountId invalido.');
+
+  const account = await prisma.account.findUnique({ where: { id: accountId }, include: { customer: true, transactions: true } });
+  return { success: true, data: account };
+};
+
+const updateAccount = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const accountId = parseInt(input?.accountId, 10);
+  if (!Number.isFinite(accountId)) throw new Error('accountId invalido.');
+
+  const data = {};
+  if (input?.creditLimit !== undefined) data.creditLimit = parseFloat(input.creditLimit);
+  if (input?.balance !== undefined) data.balance = parseFloat(input.balance);
+
+  const account = await prisma.account.update({ where: { id: accountId }, data });
+  return { success: true, message: 'Cuenta actualizada.', data: account };
+};
+
+const createAccountTransaction = async (input, context) => {
+  if (!context?.userId) throw new Error('Usuario no autenticado en el contexto.');
+  const accountId = parseInt(input?.accountId, 10);
+  const type = String(input?.type || '').toUpperCase();
+  const amount = parseFloat(input?.amount);
+  if (!Number.isFinite(accountId) || !['CARGO', 'ABONO'].includes(type) || !Number.isFinite(amount) || amount <= 0) {
+    throw new Error('Parametros invalidos para transaccion de cuenta.');
+  }
+
+  const txResult = await prisma.$transaction(async (tx) => {
+    const account = await tx.account.findUnique({ where: { id: accountId } });
+    if (!account) throw new Error('Cuenta no encontrada.');
+
+    const newBalance = type === 'CARGO' ? parseFloat(account.balance) + amount : parseFloat(account.balance) - amount;
+    await tx.account.update({ where: { id: accountId }, data: { balance: newBalance, lastActivity: new Date() } });
+
+    const transaction = await tx.accountTransaction.create({ data: { accountId, userId: context.userId, type, amount, description: input?.description ? String(input.description) : null } });
+    return { account: await tx.account.findUnique({ where: { id: accountId } }), transaction };
+  });
+
+  return { success: true, message: 'Transaccion creada.', data: txResult };
+};
+
 const buildCartEstimate = async (input) => {
   const items = Array.isArray(input?.items) ? input.items : [];
   const limit = clamp(input?.limit, 1, 5, 3);
@@ -537,6 +911,26 @@ const executeTool = async (toolName, input, context) => {
       return createCustomer(input);
     case 'create_inventory_movement':
       return createInventoryMovement(input, context);
+    case 'create_sale':
+      return createSaleTool(input, context);
+    case 'create_product':
+      return createProduct(input, context);
+    case 'update_product':
+      return updateProduct(input, context);
+    case 'delete_product':
+      return deleteProduct(input, context);
+    case 'update_customer':
+      return updateCustomer(input, context);
+    case 'delete_customer':
+      return deleteCustomer(input, context);
+    case 'list_accounts':
+      return listAccounts(input);
+    case 'get_account':
+      return getAccount(input);
+    case 'update_account':
+      return updateAccount(input, context);
+    case 'create_account_transaction':
+      return createAccountTransaction(input, context);
     case 'build_cart_estimate':
       return buildCartEstimate(input);
     default:

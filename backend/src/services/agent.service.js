@@ -555,6 +555,7 @@ const getAgentReply = async ({ message, history, allowWrite, userId, memorySumma
   try {
     let toolInput = decision.input;
     let bypassModelResponse = false;
+    let executedToolResult = null;
 
     if (decision.tool === 'build_cart_estimate') {
       const cartItems = normalizeCartItems(message, decision.input);
@@ -574,12 +575,14 @@ const getAgentReply = async ({ message, history, allowWrite, userId, memorySumma
     }
 
     const toolResult = await executeTool(decision.tool, toolInput, { userId });
+    executedToolResult = toolResult;
 
     if (bypassModelResponse) {
       return {
         reply: formatCartEstimateReply(toolResult),
         usedContext: true,
         tool: decision.tool,
+        toolResult: executedToolResult,
         sources
       };
     }
@@ -596,7 +599,7 @@ const getAgentReply = async ({ message, history, allowWrite, userId, memorySumma
       }
     );
 
-    return { reply, usedContext: true, tool: decision.tool, sources };
+    return { reply, usedContext: true, tool: decision.tool, toolResult: executedToolResult, sources };
   } catch (error) {
     return {
       reply: `No pude ejecutar la accion solicitada. ${error.message}`,

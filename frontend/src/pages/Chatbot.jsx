@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { HiChat, HiPaperAirplane } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import { chatbotService } from '../services';
+import POSModal from '../components/pos/POSModal';
 
 const FAQ_ITEMS = [
   {
@@ -48,6 +49,8 @@ const Chatbot = () => {
   const [allowWrite, setAllowWrite] = useState(false);
   const [sessionId, setSessionId] = useState(() => localStorage.getItem('chatbotSessionId'));
   const [pendingConfirmation, setPendingConfirmation] = useState(null);
+  const [posModalOpen, setPosModalOpen] = useState(false);
+  const [posData, setPosData] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
 
   useEffect(() => {
@@ -136,6 +139,12 @@ const Chatbot = () => {
           meta
         }
       ]);
+
+      // If the assistant returned a structured tool result for a cart, open POS modal
+      if (meta.toolUsed === 'build_cart_estimate' && meta.toolResult) {
+        setPosData(meta.toolResult);
+        setPosModalOpen(true);
+      }
 
       if (meta.requiresConfirmation) {
         setPendingConfirmation({ message: backendMessage });
@@ -301,6 +310,18 @@ const Chatbot = () => {
           </div>
         </form>
       </div>
+      <POSModal
+        open={posModalOpen}
+        onClose={() => setPosModalOpen(false)}
+        cartData={posData}
+        onSaleCreated={(sale) => {
+          setPosModalOpen(false);
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: `Venta creada: ID ${sale.id}. Total: ${sale.total}` }
+          ]);
+        }}
+      />
     </div>
   );
 };

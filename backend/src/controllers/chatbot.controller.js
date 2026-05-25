@@ -44,7 +44,7 @@ const sendMessage = async (req, res) => {
     const storedHistory = await getRecentMessages(session.id);
     const runtimeHistory = history.length ? history : storedHistory;
 
-    const { reply, usedContext, tool, sources, requiresConfirmation } = await getAgentReply({
+    const { reply, usedContext, tool, sources, requiresConfirmation, toolResult } = await getAgentReply({
       message,
       history: runtimeHistory,
       allowWrite: Boolean(allowWrite),
@@ -75,11 +75,12 @@ const sendMessage = async (req, res) => {
         sessionId: session.id,
         messageId: assistantMessage.id,
         meta: {
-          usedContext: Boolean(usedContext),
-          toolUsed: tool || null,
-          sources: sources || [],
-          requiresConfirmation: Boolean(requiresConfirmation)
-        }
+            usedContext: Boolean(usedContext),
+            toolUsed: tool || null,
+            toolResult: toolResult || null,
+            sources: sources || [],
+            requiresConfirmation: Boolean(requiresConfirmation)
+          }
       }
     });
   } catch (error) {
