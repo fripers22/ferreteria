@@ -3,6 +3,39 @@ import { HiChat, HiPaperAirplane } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 import { chatbotService } from '../services';
 
+const FAQ_ITEMS = [
+  {
+    question: '¿Qué puede hacer el asistente de IA de FerreSync?',
+    answer:
+      'Puede responder dudas del sistema, consultar inventario, ayudarte a cotizar materiales y mostrar contexto sobre clientes, cuentas y reportes.'
+  },
+  {
+    question: '¿Cómo consulto el inventario actual?',
+    answer:
+      'Pide el nombre del producto, SKU o una consulta como “muéstrame el inventario actual”. El asistente busca existencias, stock mínimo y categoría.'
+  },
+  {
+    question: '¿Me ayuda a armar una lista de materiales para pintar?',
+    answer:
+      'Sí. Puedes decir “qué necesito para pintar una pared” y el bot sugiere pintura, lija, cinta, rodillo y otros insumos según lo que encuentre en inventario.'
+  },
+  {
+    question: '¿Qué información necesito para cotizar una repisa o un estante?',
+    answer:
+      'Lo ideal es indicar medidas, material, cantidad de soportes y el tipo de instalación. Con eso el asistente arma una propuesta de materiales más contextualizada.'
+  },
+  {
+    question: '¿Puedo crear clientes desde el chat?',
+    answer:
+      'Sí. El asistente pide al menos nombre y, si los tienes, teléfono, correo, dirección o RFC. Las acciones de escritura siempre solicitan confirmación.'
+  },
+  {
+    question: '¿Qué pasa si no hay stock suficiente?',
+    answer:
+      'El asistente puede indicarlo y ayudarte a identificar productos faltantes para que busques alternativas o completes la compra.'
+  }
+];
+
 const Chatbot = () => {
   const defaultMessage = {
     role: 'assistant',
@@ -136,8 +169,19 @@ const Chatbot = () => {
     });
   };
 
+  const sendFaqQuestion = (question) => {
+    if (loading) {
+      return;
+    }
+
+    setInput(question);
+    window.setTimeout(() => {
+      handleSend(question);
+    }, 0);
+  };
+
   return (
-    <div className="min-h-[calc(100dvh-160px)] flex flex-col">
+    <div className="min-h-[calc(100dvh-160px)] flex flex-col gap-4">
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           <HiChat className="w-8 h-8 text-primary-600" />
@@ -145,6 +189,40 @@ const Chatbot = () => {
         </h1>
         <p className="text-gray-500">Consulta información del sistema usando lenguaje natural</p>
       </div>
+
+      <section className="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 via-white to-amber-50 p-4 shadow-sm">
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Preguntas frecuentes</h2>
+            <p className="text-sm text-gray-600">
+              Basadas en lo que ya resuelve el asistente: inventario, materiales, clientes y confirmaciones.
+            </p>
+          </div>
+          <p className="text-xs font-medium uppercase tracking-[0.22em] text-sky-700">
+            Respuestas contextuales del sistema
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {FAQ_ITEMS.map((item) => (
+            <article
+              key={item.question}
+              className="rounded-2xl border border-white bg-white/90 p-4 shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <h3 className="font-semibold text-gray-800">{item.question}</h3>
+              <p className="mt-2 text-sm leading-6 text-gray-600">{item.answer}</p>
+              <button
+                type="button"
+                onClick={() => sendFaqQuestion(item.question)}
+                disabled={loading}
+                className="mt-4 inline-flex items-center rounded-full bg-sky-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Usar esta pregunta
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
 
       <div className="flex-1 bg-white rounded-xl border border-gray-200 flex flex-col overflow-hidden">
         {/* Mensajes */}
